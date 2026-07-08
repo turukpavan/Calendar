@@ -1,32 +1,40 @@
-import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
-import { COLORS } from '../constants/colors'
+import { View, Text, StyleSheet } from 'react-native';
+import React, { memo } from 'react';
+import { COLORS } from '../constants/colors';
+import dayjs from 'dayjs';
 
-export default function WeekHeader(){
-    const weekDays = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+function WeekHeader() {
+  const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const activeDay = dayjs().day();
+
   return (
     <View style={styles.container}>
-        {weekDays.map(day=>(
-            <Text style={styles.day}>
-                {day}
-            </Text>
-        ))}
+      {weekDays.map((day, idx) => (
+        <Text key={idx+1} style={[styles.day, activeDay === idx && styles.activeDay]}>
+          {day}
+        </Text>
+      ))}
     </View>
-  )
+  );
 }
 
+export default memo(WeekHeader);
 
 const styles = StyleSheet.create({
-    container :{
-        flexDirection : "row",
-          marginTop: 10,
-          marginBottom: 8,
-    },
-    day :{
-          flex: 1,
+  container: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginBottom: 8,
+  },
+  day: {
+    flex: 1,
     textAlign: 'center',
     color: COLORS.weekDay,
-    fontWeight: '600',
+    fontWeight: '500',
     fontSize: 14,
-    }
-})
+  },
+  activeDay: {
+    color: COLORS.primary,
+    fontWeight: '900',
+  },
+});

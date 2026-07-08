@@ -1,106 +1,42 @@
-import React, { useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
+    Dimensions,
   StyleSheet,
-  View,
+  TouchableOpacity,
 } from 'react-native';
-import MonthGrid from '../components/MonthGrid';
 import WeekHeader from '../components/WeekHeader';
 import CalendarHeader from '../components/CalendarHeader';
 import { COLORS } from '../constants/colors';
-import dayjs from 'dayjs';
-
+import { useInfiniteCalendar } from '../hooks/useINfiniteCalendar';
+import { useState } from 'react';
+import Icon from '../components/Icon';
+import AddEventModal from '../components/Modals/AddEventModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import InfiniteCalendar from '../components/InfiniteCalendar';
 const SCREEN_WIDTH = Dimensions.get('window').width;
-export default function CalendarScreen() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const flatListRef = useRef<FlatList<Date>>(null);
-  const isResetting = useRef(false);
-  const [months, setMonths] = useState([
-    dayjs(currentDate).subtract(1, 'month').toDate(),
-    currentDate,
-    dayjs(currentDate).add(1, 'month').toDate(),
-  ]);
-
-  const handleMomentumEnd = (
-    event: NativeSyntheticEvent<NativeScrollEvent>,
-  ) => {
-    // Ignore the scroll event caused by scrollToIndex()
-    if (isResetting.current) {
-      isResetting.current = false;
-      return;
-    }
-
-    const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-
-    // Next month
-    if (index === 2) {
-      const newCurrent = dayjs(currentDate).add(1, 'month');
-
-      setCurrentDate(newCurrent.toDate());
-
-      setMonths([
-        dayjs(newCurrent).subtract(1, 'month').toDate(),
-        newCurrent.toDate(),
-        dayjs(newCurrent).add(1, 'month').toDate(),
-      ]);
-
-      isResetting.current = true;
-
-      requestAnimationFrame(() => {
-        flatListRef.current?.scrollToIndex({
-          index: 1,
-          animated: false,
-        });
-      });
-    }
-
-    // Previous month
-    if (index === 0) {
-      const newCurrent = dayjs(currentDate).subtract(1, 'month');
-
-      setCurrentDate(newCurrent.toDate());
-
-      setMonths([
-        dayjs(newCurrent).subtract(1, 'month').toDate(),
-        newCurrent.toDate(),
-        dayjs(newCurrent).add(1, 'month').toDate(),
-      ]);
-
-      isResetting.current = true;
-
-      requestAnimationFrame(() => {
-        flatListRef.current?.scrollToIndex({
-          index: 1,
-          animated: false,
-        });
-      });
-    }
-  };
+export default function CalendarScreen({ navigation }: any) {
+  const [showModal, setShowModal] = useState(false);
+  const { months, handleMomentumEnd, flatListRef, currentDate } =
+    useInfiniteCalendar();
+  
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <CalendarHeader currentDate={currentDate} />
       <WeekHeader />
-      <FlatList
-        ref={flatListRef}
-        data={months}
-        horizontal
-        pagingEnabled
-        initialScrollIndex={1}
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={item => item.toISOString()}
-        renderItem={({ item }) => <MonthGrid currentDate={item} />}
-        onMomentumScrollEnd={handleMomentumEnd}
-        getItemLayout={(_, index) => ({
-          length: SCREEN_WIDTH,
-          offset: SCREEN_WIDTH * index,
-          index,
-        })}
+        <InfiniteCalendar width={SCREEN_WIDTH} months={months} flatListRef={flatListRef} handleMomentumEnd={handleMomentumEnd}/>
+      <TouchableOpacity
+        style={styles.addEvent}
+        activeOpacity={0.8}
+        onPress={() => setShowModal(true)}
+      >
+        <Icon name="Plus" color={COLORS.textPrimary} />
+      </TouchableOpacity>
+      <AddEventModal
+        navigation={navigation}
+        visible={showModal}
+        onClose={() => setShowModal(false)}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -108,5 +44,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
+  },
+  addEvent: {
+    borderRadius: 10,
+    padding: 20,
+    backgroundColor: COLORS.eventIconBackground,
+    position: 'absolute',
+    bottom: 30,
+    right: 10,
+  },
+  absoluteView: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#000000a4',
   },
 });

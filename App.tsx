@@ -1,13 +1,14 @@
 import React from 'react';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import CalendarScreen from './src/screens/CalendarScreen';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './src/navigations/AppNavigator';
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }}>
-        <CalendarScreen />
-      </SafeAreaView>
+        <NavigationContainer>
+           <AppNavigator/>
+        </NavigationContainer>
     </SafeAreaProvider>
   );
 }

@@ -1,72 +1,94 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { memo, useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { getMonthDates } from '../utils/calendar';
 import dayjs from 'dayjs';
 import { COLORS } from '../constants/colors';
+import { useCalendar } from '../context/CalendarContext';
 
-const CELL_SIZE = `${100/5}%`;
-const SCREEN_WIDTH = Dimensions.get('window').width;
+const CELL_SIZE = `${100 / 6}%`;
+
 type Props = {
-  currentDate : Date
-}
+  width: number;
+  currentDate: Date;   
+};
 
-export default function MonthGrid({currentDate}:Props) {
-  const dates = getMonthDates(currentDate);
-  console.log(dates);
-  
+function MonthGrid({ currentDate, width }: Props) {
+ const {selectedDate, setSelectedDate} = useCalendar(); 
+  const dates = useMemo(() => {
+    return getMonthDates(currentDate);
+  }, [currentDate]);
 
   return (
-  <View style={styles.page}>
-    <View style={styles.container}>
-      {dates.map((date) => {
-        const isToday = dayjs(date).isSame(new Date(),'day')
-        const isCurrentMonth = dayjs(date).month === dayjs(currentDate).month
-        return(
-        <View key={date.toISOString()} style={styles.cell}>
-          <View style={[styles.dateCircle, isToday && styles.todayCircle]}>
-          <Text style={[styles.text,{color : isToday ? COLORS.textPrimary :isCurrentMonth ? COLORS.textPrimary: COLORS.textDisabled}]}>
-            {date.getDate()}
-          </Text>
-          </View>
-        </View>
-      )})}
+    <View style={{ width: width, flex: 1 }}>
+      <View style={styles.container}>
+        {dates.map((date) => {
+          const isToday = dayjs(date).isSame(new Date(), 'day');
+          
+          const isSelected = selectedDate 
+            ? dayjs(date).isSame(selectedDate, 'day') 
+            : false;
+
+          return (
+            <TouchableOpacity 
+              key={date.toISOString()} 
+              style={styles.cell}
+              activeOpacity={0.7}
+              onPress={() => setSelectedDate(date)} 
+            >
+              <View style={[
+                styles.dateCircle, 
+                isToday && styles.todayCircle,
+                isSelected && styles.selectedCircle 
+              ]}>
+                <Text style={[
+                  styles.text,
+                  
+                ]}>
+                  {date.getDate()}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
-    </View>
-  
   );
 }
 
+export default memo(MonthGrid);
+
 const styles = StyleSheet.create({
-  page: {
-  width: SCREEN_WIDTH,
-},
   container: {
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-   
   },
-
   cell: {
     width: `${100 / 7}%`,
     height: CELL_SIZE,
     borderWidth: 0.5,
     borderColor: COLORS.border,
-    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-
   text: {
-    color: COLORS.textPrimary,
+    color : COLORS.textPrimary,
     fontSize: 16,
+    fontWeight: '500',
   },
-  dateCircle : {
-     width: 30,
-  height: 30,
-  borderRadius: 15,
-  justifyContent: 'center',
-  alignItems: 'center',
+  dateCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   todayCircle: {
-  backgroundColor: COLORS.primary,
-},
+    backgroundColor : COLORS.primary 
+  },
+  selectedCircle: {
+        borderRadius: 16,
+
+    backgroundColor: COLORS.secondary, 
+  },
 });

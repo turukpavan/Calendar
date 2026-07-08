@@ -29,7 +29,17 @@ export const COLORS = {
   eventGreen: '#34A853',
   eventRed: '#EA4335',
   eventYellow: '#FBBC05',
+  eventIconBackground : '#AA8873',
+  taskIconBackground : '#473930',
 
+  // btn color
+  saveButton : '#E5AFA8',
+  switchButton : '#E5AFA8',
+
+  transferent : '#00000000',
+
+  // modals
+  selectDateModal : '#362827',
   // Status
   success: '#34A853',
   warning: '#FBBC05',

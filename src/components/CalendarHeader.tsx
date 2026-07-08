@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import React from 'react';
+import React, { memo } from 'react';
 import dayjs from 'dayjs';
 import { COLORS } from '../constants/colors';
 import Icon from './Icon';
@@ -7,15 +7,14 @@ import Icon from './Icon';
 type Props = {
   currentDate: Date;
 };
-export default function CalendarHeader({ currentDate }: Props) {
-  const month = dayjs(currentDate).format('MMMM');
+ function CalendarHeader({ currentDate }: Props) {
   return (
     <View style={styles.container}>
       <TouchableOpacity>
         <Icon name="Menu" color={COLORS.textPrimary} />
       </TouchableOpacity>
       <Text style={styles.title}>
-        {month.slice(0, 3)} {dayjs(currentDate).format('YYYY')}
+        {dayjs(currentDate).format('MMM YYYY')}
       </Text>
       <TouchableOpacity>
         <Icon name="Search" color={COLORS.textPrimary} />
@@ -27,6 +26,8 @@ export default function CalendarHeader({ currentDate }: Props) {
     </View>
   );
 }
+
+export default memo(CalendarHeader);
 
 const styles = StyleSheet.create({
   container: {
