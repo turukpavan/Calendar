@@ -10,6 +10,7 @@ import AddEventModal from '../components/Modals/AddEventModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InfiniteCalendar from '../components/InfiniteCalendar';
 import { getSchedules, Schedule } from '../database/scheduleRepository';
+import { toastService } from '../services/toastService';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 export default function CalendarScreen({ navigation }: any) {
   const [showModal, setShowModal] = useState(false);
@@ -18,14 +19,16 @@ export default function CalendarScreen({ navigation }: any) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const loadSchedules = async () => {
     try {
-    
-      const data = await getSchedules();
-      console.log(data);
-
+        const data = await getSchedules();
       setSchedules(data);
+      
     } catch (error) {
-      console.log(error);
-    }
+ if (error instanceof Error) {
+    toastService.error('Fail!', error.message);
+  } else {
+    toastService.error('Fail!', 'Something went wrong');
+  }    }
+    
   };
 
   useFocusEffect(

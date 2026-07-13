@@ -28,7 +28,6 @@ type Props = {
 };
 
 function InfiniteCalendar({
- 
   schedules,
     width,
   months,

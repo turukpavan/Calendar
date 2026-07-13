@@ -6,6 +6,7 @@ import {
   Schedule,
 } from '../database/scheduleRepository';
 import { scheduleNotification } from '../services/notificationService';
+import { toastService } from '../services/toastService';
 
 export type DateCategory =
   | 'taskDate'
@@ -145,7 +146,12 @@ export const useScheduleForm = ({
     [timeCategory],
   );
 
-  const handleSave = useCallback(async () => {
+ const handleSave = useCallback(async () => {
+   if (title.trim().length === 0 && description.trim().length === 0 ) {
+    toastService.error('failed to save','title/description required')
+    return
+   }
+  try {
     const now = new Date();
 
     const schedule: Schedule = {
@@ -159,34 +165,50 @@ export const useScheduleForm = ({
         ? taskDate.toISOString()
         : endDate.toISOString(),
       allDay,
-      repeatType: isTask
-        ? repeatType
-        : 'none',
+      repeatType: isTask ? repeatType : 'none',
       completed: false,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
     };
 
     await insertSchedule(schedule);
-    // notification Serviced called
+
+    // notification service
     await scheduleNotification(
-  schedule.title,
-  schedule.description,
-  new Date(schedule.startDate),
-);
+      schedule.title,
+      schedule.description,
+      new Date(schedule.startDate)
+    );
+
+    toastService.success(
+      'Success',
+      'Task/Event saved successfully'
+    );
 
     onSaveSuccess();
-  }, [
-    isTask,
-    title,
-    description,
-    taskDate,
-    startDate,
-    endDate,
-    allDay,
-    repeatType,
-    onSaveSuccess,
-  ]);
+  } catch (error) {
+    if (error instanceof Error) {
+      toastService.error('Failed!', error.message);
+    } else {
+      toastService.error(
+        'Failed!',
+        'Something went wrong '
+      );
+    }
+
+    console.log(error);
+  }
+}, [
+  isTask,
+  title,
+  description,
+  taskDate,
+  startDate,
+  endDate,
+  allDay,
+  repeatType,
+  onSaveSuccess,
+]);
 
   const openDateModal = (category: DateCategory) => {
   setDateCategory(category);

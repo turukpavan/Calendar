@@ -5,6 +5,7 @@ import AppNavigator from './src/navigations/AppNavigator';
 import { createTables } from './src/database/migration';
 import notifee from '@notifee/react-native'
 import { createNotificationChannel } from './src/services/notificationService';
+import Toast from 'react-native-toast-message';
 
 export default function App() {
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function App() {
         <NavigationContainer>
            <AppNavigator/>
         </NavigationContainer>
+        <Toast/>
     </SafeAreaProvider>
   );
 }
