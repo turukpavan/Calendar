@@ -17,37 +17,24 @@ import dayjs from 'dayjs';
 import { useCalendar } from '../../context/CalendarContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
 const MODAL_WIDTH = SCREEN_WIDTH * 0.9;
+
 type Props = {
-    dateCategory : String;
- setTaskDate: (date: Date) => void;
-  setStartDate: (date: Date) => void;
-  setEndDate: (date: Date) => void;
+  onDateSelect: (date: Date) => void;
   visible: boolean;
   onClose: () => void;
-  navigation: any;
 };
 
-const SelectDateModal = ({ visible, onClose,setTaskDate, setStartDate, setEndDate ,dateCategory }: Props) => {
+const SelectDateModal = ({ visible, onClose, onDateSelect }: Props) => {
   const { selectedDate } = useCalendar();
   const { months, handleMomentumEnd, flatListRef, currentDate } =
     useInfiniteCalendar();
-    const targetDate = selectedDate || currentDate || new Date();
-  const handleConform =()=>{
-    if(dateCategory == 'taskDate'){
 
-        setTaskDate(new Date(targetDate));
-    }else if(dateCategory == 'startDate'){
+  const targetDate = selectedDate || currentDate || new Date();
 
-        setStartDate(new Date(targetDate));
-    }else{
-
-        setEndDate(new Date(targetDate));
-    }
-    
-    onClose();
-  }
+  const handleConfirm = () => {
+    onDateSelect(new Date(targetDate));
+  };
   return (
     <Modal
       visible={visible}
@@ -67,16 +54,18 @@ const SelectDateModal = ({ visible, onClose,setTaskDate, setStartDate, setEndDat
           </Text>
           <WeekHeader />
           <InfiniteCalendar
+           
             width={MODAL_WIDTH}
             months={months}
             handleMomentumEnd={handleMomentumEnd}
             flatListRef={flatListRef}
           />
           <View style={styles.navigationButton}>
-            <TouchableOpacity onPress={handleConform}>
+            <TouchableOpacity onPress={handleConfirm}>
               <Text style={styles.close}>Ok</Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            {/* Fixed: Added onPress to trigger onClose */}
+            <TouchableOpacity onPress={onClose}>
               <Text style={styles.close}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -95,7 +84,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   container: {
     width: '90%',
     minHeight: 400,
@@ -103,7 +91,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 15,
   },
-
   title: {
     color: COLORS.textPrimary,
     fontSize: 15,
@@ -116,13 +103,8 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '400',
     marginBottom: 20,
+    paddingHorizontal: 10, // Added padding alignment
   },
-
-  closeButton: {
-    alignSelf: 'flex-end',
-    marginTop: 10,
-  },
-
   close: {
     color: COLORS.primary,
     fontSize: 16,
@@ -132,5 +114,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     gap: 30,
     paddingHorizontal: 20,
+    marginTop: 10,
   },
 });

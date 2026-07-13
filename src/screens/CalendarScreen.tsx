@@ -1,29 +1,49 @@
-import {
-    Dimensions,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import WeekHeader from '../components/WeekHeader';
 import CalendarHeader from '../components/CalendarHeader';
 import { COLORS } from '../constants/colors';
 import { useInfiniteCalendar } from '../hooks/useINfiniteCalendar';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from '../components/Icon';
 import AddEventModal from '../components/Modals/AddEventModal';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import InfiniteCalendar from '../components/InfiniteCalendar';
+import { getSchedules, Schedule } from '../database/scheduleRepository';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 export default function CalendarScreen({ navigation }: any) {
   const [showModal, setShowModal] = useState(false);
   const { months, handleMomentumEnd, flatListRef, currentDate } =
     useInfiniteCalendar();
-  
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const loadSchedules = async () => {
+    try {
+    
+      const data = await getSchedules();
+      console.log(data);
 
+      setSchedules(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      loadSchedules();
+    }, []),
+  );
   return (
     <SafeAreaView style={styles.container}>
       <CalendarHeader currentDate={currentDate} />
       <WeekHeader />
-        <InfiniteCalendar width={SCREEN_WIDTH} months={months} flatListRef={flatListRef} handleMomentumEnd={handleMomentumEnd}/>
+      <InfiniteCalendar
+        width={SCREEN_WIDTH}
+        schedules={schedules}
+        months={months}
+        flatListRef={flatListRef}
+        handleMomentumEnd={handleMomentumEnd}
+      />
       <TouchableOpacity
         style={styles.addEvent}
         activeOpacity={0.8}

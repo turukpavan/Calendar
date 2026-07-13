@@ -2,13 +2,15 @@ import React, { createContext, useContext, useState } from 'react';
 
 type CalendarContextType = {
   selectedDate: Date | null;
-  setSelectedDate: (date: Date) => void;
+  setSelectedDate: React.Dispatch<
+    React.SetStateAction<Date | null>
+  >;
 };
 
 const CalendarContext = createContext<CalendarContextType | undefined>(undefined);
 
 export function CalendarProvider({ children }: { children: React.ReactNode }) {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   return (
     <CalendarContext.Provider value={{ selectedDate, setSelectedDate }}>

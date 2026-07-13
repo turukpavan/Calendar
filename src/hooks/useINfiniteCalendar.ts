@@ -4,7 +4,7 @@ import { Dimensions, FlatList, NativeScrollEvent, NativeSyntheticEvent } from "r
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export  const useInfiniteCalendar = ()=>{
-
+  
   const [currentDate, setCurrentDate] = useState(new Date());
   const flatListRef = useRef<FlatList<Date>>(null);
   const isResetting = useRef(false);
@@ -13,6 +13,7 @@ export  const useInfiniteCalendar = ()=>{
     currentDate,
     dayjs(currentDate).add(1, 'month').toDate(),
   ]);
+  
 
   const handleMomentumEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>,

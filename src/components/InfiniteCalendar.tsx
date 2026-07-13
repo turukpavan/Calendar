@@ -6,18 +6,30 @@ import {
 } from 'react-native';
 
 import MonthGrid from './MonthGrid';
+import { Schedule } from '../database/scheduleRepository';
 
 
 type Props = {
-    width : number;
+ 
+  schedules?: Schedule[];
+  width: number;
   months: Date[];
   flatListRef: React.RefObject<FlatList<Date> | null>;
+
+  selectedDate?: Date | null;
+
+  setSelectedDate?: React.Dispatch<
+    React.SetStateAction<Date | null>
+  >;
+
   handleMomentumEnd: (
     event: NativeSyntheticEvent<NativeScrollEvent>,
   ) => void;
 };
 
 function InfiniteCalendar({
+ 
+  schedules,
     width,
   months,
   flatListRef,
@@ -25,9 +37,9 @@ function InfiniteCalendar({
 }: Props) {
   const renderItem = useCallback(
     ({ item }: { item: Date }) => (
-      <MonthGrid  currentDate={item} width={width} />
+      <MonthGrid schedules={schedules}  currentDate={item} width={width} />
     ),
-    [width],
+    [width,schedules],
   );
 
   const keyExtractor = useCallback(
@@ -59,9 +71,9 @@ function InfiniteCalendar({
       bounces={false}
       overScrollMode="never"
       removeClippedSubviews
-      windowSize={3}
-      maxToRenderPerBatch={3}
-      initialNumToRender={3}
+      windowSize={2}
+      maxToRenderPerBatch={2}
+      initialNumToRender={1}
     />
   );
 }

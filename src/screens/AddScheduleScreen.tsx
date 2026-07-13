@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -17,25 +17,52 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigations/AppNavigator';
 import { ROUTES } from '../constants/routes';
 import SelectDateModal from '../components/Modals/SelectDateModal';
+import SelectTimeModal from '../components/Modals/SelectTimeModal';
+import { useScheduleForm } from '../hooks/useScheduleForm';
+import ScheduleDateRow from '../components/ScheduleDateRow';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
   typeof ROUTES.ADD_SCHEDULE
 >;
 export default function AddScheduleScreen({ navigation, route }: Props) {
-  const [showModal, setShowModal] = useState(false);
   const isTask = route.params?.type === 'task';
 
-    const [dateCategory ,setDateCategory] = useState('')
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [allDay, setAllDay] = useState(false);
+  const {
+    openDateModal,
+    openTimeModal,
 
-  const [taskDate, setTaskDate] = useState(new Date());
+    showModal,
+    setShowModal,
 
-  const [startDate, setStartDate] = useState(new Date());
+    showSelectTimeModal,
+    setShowSelectTimeModal,
 
-  const [endDate, setEndDate] = useState(new Date());
+    timeCategory,
+
+    repeatType,
+    setRepeatType,
+
+    title,
+    setTitle,
+
+    description,
+    setDescription,
+
+    allDay,
+
+    taskDate,
+    startDate,
+    endDate,
+
+    handleDateSelect,
+    handleAllDayChange,
+    handleTimeSelect,
+    handleSave,
+  } = useScheduleForm({
+    isTask,
+    onSaveSuccess: () => navigation.goBack(),
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,7 +74,7 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
             <Icon name="X" color={COLORS.textPrimary} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.saveButton}>
+          <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
             <Text style={styles.saveText}>Save</Text>
           </TouchableOpacity>
         </View>
@@ -108,7 +135,7 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
               <View style={styles.switchContainer}>
                 <Switch
                   value={allDay}
-                  onValueChange={setAllDay}
+                  onValueChange={handleAllDayChange}
                   trackColor={{
                     false: COLORS.transferent,
                     true: COLORS.transferent,
@@ -119,24 +146,37 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
             </View>
 
             {isTask ? (
-              <>
-                <Text onPress={() => {setShowModal(true); setDateCategory('taskDate')}} style={styles.title}>{taskDate.toDateString()}</Text>
-              </>
+              <ScheduleDateRow
+                date={taskDate}
+                allDay={allDay}
+                dateCategory="taskDate"
+                timeCategory="task"
+                onDatePress={openDateModal}
+                onTimePress={openTimeModal}
+              />
             ) : (
               <>
-                <Text style={styles.subtitle}>Starts</Text>
-
-                <Text onPress={() => {setShowModal(true); setDateCategory('startDate')}} style={styles.title}>
-                  {startDate.toDateString()}
-                </Text>
+                <ScheduleDateRow
+                  label="Starts"
+                  date={startDate}
+                  allDay={allDay}
+                  dateCategory="taskDate"
+                  timeCategory="task"
+                  onDatePress={openDateModal}
+                  onTimePress={openTimeModal}
+                />
 
                 <View style={{ height: 10 }} />
 
-                <Text style={styles.subtitle}>Ends</Text>
-
-                <Text onPress={() => {setShowModal(true); setDateCategory('endDate')}} style={styles.title}>
-                  {endDate.toDateString()}
-                </Text>
+                <ScheduleDateRow
+                  label="Ends"
+                  date={endDate}
+                  allDay={allDay}
+                  dateCategory="taskDate"
+                  timeCategory="task"
+                  onDatePress={openDateModal}
+                  onTimePress={openTimeModal}
+                />
               </>
             )}
           </View>
@@ -144,24 +184,43 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
 
         <View style={styles.divider} />
 
-        <View style={styles.row}>
-          <View style={styles.icon}>
-            <Icon name="RotateCcw" color={COLORS.textPrimary} />
-          </View>
+        {isTask && (
+          <TouchableOpacity
+            onPress={() =>
+              setRepeatType(prev => (prev === 'none' ? 'daily' : 'none'))
+            }
+            style={styles.row}
+          >
+            <View style={styles.icon}>
+              <Icon
+                name={repeatType === 'none' ? 'X' : 'RotateCcw'}
+                color={COLORS.textPrimary}
+              />
+            </View>
 
-          <View style={styles.content}>
-            <Text style={styles.title}>Does not repeat</Text>
-          </View>
-          <SelectDateModal
-            dateCategory = {dateCategory}
-            setTaskDate ={setTaskDate}
-            setStartDate = {setStartDate}
-            setEndDate= {setEndDate}
-            navigation={navigation}
-            visible={showModal}
-            onClose={() => setShowModal(false)}
-          />
-        </View>
+            <View style={styles.content}>
+              <Text style={styles.title}>Does not repeat</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        <SelectDateModal
+          onDateSelect={handleDateSelect}
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+        />
+        <SelectTimeModal
+          visible={showSelectTimeModal}
+          onClose={() => setShowSelectTimeModal(false)}
+          time={
+            timeCategory === 'task'
+              ? taskDate
+              : timeCategory === 'start'
+              ? startDate
+              : endDate
+          }
+          onConfirm={handleTimeSelect}
+        />
       </ScrollView>
     </SafeAreaView>
   );
