@@ -160,8 +160,8 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
                   label="Starts"
                   date={startDate}
                   allDay={allDay}
-                  dateCategory="taskDate"
-                  timeCategory="task"
+                  dateCategory="startDate"
+                  timeCategory="start"
                   onDatePress={openDateModal}
                   onTimePress={openTimeModal}
                 />
@@ -172,8 +172,8 @@ export default function AddScheduleScreen({ navigation, route }: Props) {
                   label="Ends"
                   date={endDate}
                   allDay={allDay}
-                  dateCategory="taskDate"
-                  timeCategory="task"
+                  dateCategory="endDate"
+                  timeCategory="end"
                   onDatePress={openDateModal}
                   onTimePress={openTimeModal}
                 />

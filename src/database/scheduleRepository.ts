@@ -60,7 +60,7 @@ export async function insertSchedule(schedule: Schedule) {
         endDate.toISOString(),
         schedule.allDay ? 1 : 0,
         schedule.repeatType,
-        schedule.completed ? 1 : 0,
+        schedule.completed ? 0 : 1,
         createdAt,
         createdAt,
       ]

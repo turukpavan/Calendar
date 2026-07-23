@@ -146,79 +146,108 @@ export const useScheduleForm = ({
     [timeCategory],
   );
 
- const handleSave = useCallback(async () => {
-   if (title.trim().length === 0 && description.trim().length === 0 ) {
-    toastService.error('failed to save','title/description required')
-    return
-   }
-  try {
-    const now = new Date();
-
-    const schedule: Schedule = {
-      type: isTask ? 'task' : 'event',
-      title,
-      description,
-      startDate: isTask
-        ? taskDate.toISOString()
-        : startDate.toISOString(),
-      endDate: isTask
-        ? taskDate.toISOString()
-        : endDate.toISOString(),
-      allDay,
-      repeatType: isTask ? repeatType : 'none',
-      completed: false,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    };
-
-    await insertSchedule(schedule);
-
-    // notification service
-    await scheduleNotification(
-      schedule.title,
-      schedule.description,
-      new Date(schedule.startDate)
-    );
-
-    toastService.success(
-      'Success',
-      'Task/Event saved successfully'
-    );
-
-    onSaveSuccess();
-  } catch (error) {
-    if (error instanceof Error) {
-      toastService.error('Failed!', error.message);
-    } else {
+  const handleSave = useCallback(async () => {
+    // Validate title
+    if (!title.trim()) {
       toastService.error(
-        'Failed!',
-        'Something went wrong '
+        'Failed to save',
+        'Title is required',
       );
+      return;
     }
 
-    console.log(error);
-  }
-}, [
-  isTask,
-  title,
-  description,
-  taskDate,
-  startDate,
-  endDate,
-  allDay,
-  repeatType,
-  onSaveSuccess,
-]);
+    // Validate event dates
+    if (!isTask && endDate <= startDate) {
+      toastService.error(
+        'Invalid Event',
+        'End date must be after start date',
+      );
+      return;
+    }
 
-  const openDateModal = (category: DateCategory) => {
-  setDateCategory(category);
-  setShowModal(true);
-};
+    try {
+      const now = new Date();
 
-const openTimeModal = (category: TimeCategory) => {
-  setTimeCategory(category);
-  setShowSelectTimeModal(true);
-};
+      const schedule: Schedule = {
+        type: isTask ? 'task' : 'event',
+        title: title.trim(),
+        description: description.trim(),
+        startDate: isTask
+          ? taskDate.toISOString()
+          : startDate.toISOString(),
+        endDate: isTask
+          ? taskDate.toISOString()
+          : endDate.toISOString(),
+        allDay,
+        repeatType: isTask
+          ? repeatType
+          : 'none',
+        completed: false,
+        createdAt: now.toISOString(),
+        updatedAt: now.toISOString(),
+      };
+
+      await insertSchedule(schedule);
+
+      // Schedule notification only for future dates
+      const notificationDate = new Date(
+        schedule.startDate,
+      );
+
+      if (notificationDate > new Date()) {
+        await scheduleNotification(
+          schedule.title,
+          schedule.description,
+          notificationDate,
+        );
+      }
+
+      toastService.success(
+        'Success',
+        'Task/Event saved successfully',
+      );
+
+      onSaveSuccess();
+    } catch (error) {
+      if (error instanceof Error) {
+        toastService.error(
+          'Failed to save',
+          error.message,
+        );
+        console.log(error);
+      } else {
+        toastService.error(
+          'Failed to save',
+          'Something went wrong',
+        );
+        console.log(error);
+      }
+    }
+  }, [
+    isTask,
+    title,
+    description,
+    taskDate,
+    startDate,
+    endDate,
+    allDay,
+    repeatType,
+    onSaveSuccess,
+  ]);
+
+  const openDateModal = (
+    category: DateCategory,
+  ) => {
+    setDateCategory(category);
+    setShowModal(true);
+  };
+
+  const openTimeModal = (
+    category: TimeCategory,
+  ) => {
+    setTimeCategory(category);
+    setShowSelectTimeModal(true);
+  };
 
   return {
     openDateModal,
@@ -244,6 +273,7 @@ const openTimeModal = (category: TimeCategory) => {
     setDescription,
 
     allDay,
+    setAllDay,
 
     taskDate,
     startDate,
