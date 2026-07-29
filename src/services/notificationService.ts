@@ -20,6 +20,9 @@ export async function scheduleNotification(
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
     timestamp: date.getTime(),
+     alarmManager: {
+      allowWhileIdle: true,
+    },
   };
 
   await notifee.createTriggerNotification(
